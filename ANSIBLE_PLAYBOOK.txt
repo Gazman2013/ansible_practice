@@ -1,0 +1,44 @@
+ansible-playbook *.yml
+  GNU nano 4.8                                                                    ftp.yml
+---
+- hosts: [all]
+  vars:
+    remote_dir: /srv/ftp
+  tasks:
+  - name: установив vsftpd
+    apt:
+      name: vsftpd
+      update_cache: no
+      state: present
+
+  - name: дабвляем пользователя vsftpd
+    user:
+      name: ftpu01
+      group: ftp
+      shell: /bin/false
+      home: /srv/ftp
+      password: "jasdhfoasihfi7jkb3lj4hbrb4"
+      state: present
+
+  - name: создание каталога
+    file:
+      path: "{{remote_dir}}"
+      state: directory
+      owner: ftpu01
+      group: ftp
+      mode: 0777
+      recurse: yes
+
+  - name: конфиг
+    blockinfile:
+      path: /etc/vsftpd.conf
+      create: yes
+      marker: ""
+      block: |
+        listen=YES
+        aninymous_enable=YES
+
+  - name: рестарт службы
+    service:
+      name: vsftpd
+      state: restarted
